@@ -11,15 +11,16 @@ class CsvController extends Controller{
             $csv = $_FILES['csv'];
             $csvMimes = array('text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain');
 
-            if($csv['size']>0 && in_array($csv['type'],$csvMimes)){
+            if($csv['size']>0 && in_array($csv['type'],$csvMimes) && strlen($csv['name'])<=70){
+                $tableName = $csv['name'].date("Y/m/d_h:i:s");
                 $csvModel = $this->model('Csv');
                 $data= $csvModel->parseCsvData($csv);
-                $tableName = $csv['name'].date("Y/m/d_h:i:s");
                 $csvModel->createCsvTable($tableName,count($data[0]));
-                $csvModel->insertCsvTable($tableName,$data);  
+                $csvModel->insertCsvTable($tableName,$data); 
+                $csvModel->updateTableList($tableName); 
 
             }else{
-                echo $this->jsonException('Invalid file');
+                echo $this->jsonException('file must be csv type and file name can\'t be longer than 70 characters');
             }
         } catch (Exception $exception) {
             echo $this->jsonException($exception->getMessage());
