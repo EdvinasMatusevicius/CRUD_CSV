@@ -29,6 +29,6 @@ class App{
             $methodIndex = 3;
         }
         $method = $this->req[$methodIndex];
-        (new $this->controller)->$method();
+        (new $this->controller)->$method($this->conn);
     }
 }
