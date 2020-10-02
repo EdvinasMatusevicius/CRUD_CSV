@@ -8,21 +8,18 @@ class CsvController extends Controller{
     public function create()
     {
         try {
-            
-            //throw $th;
             $csv = $_FILES['csv'];
-            if($csv['size']>0){
-                $fileName = $csv['tmp_name'];
-                $file = fopen($fileName,"r");
-                $data=[];
-                while(($column = fgetcsv($file,10000,",")) !== FALSE){
-                    array_push($data,$column);
-                }
-                fclose($file);
+            $csvMimes = array('text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain');
+
+            if($csv['size']>0 && in_array($csv['type'],$csvMimes)){
+                $csvModel = $this->model('Csv');
+                $data= $csvModel->parseCsvData($csv);
                 $tableName = $csv['name'].date("Y/m/d_h:i:s");
-                $this->model('Csv')->createCsvTable($tableName,count($data[0]));
-                $this->model('Csv')->insertCsvTable($tableName,$data);
-                
+                $csvModel->createCsvTable($tableName,count($data[0]));
+                $csvModel->insertCsvTable($tableName,$data);  
+
+            }else{
+                echo $this->jsonException('Invalid file');
             }
         } catch (Exception $exception) {
             echo $this->jsonException($exception->getMessage());

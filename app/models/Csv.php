@@ -2,7 +2,17 @@
 
 class Csv extends Database{
 
-    protected $query;
+    public function parseCsvData($csv){
+        //SET USER SELECTED DELIMETER
+        $fileName = $csv['tmp_name'];
+        $file = fopen($fileName,"r");
+        $data=[];
+        while(($column = fgetcsv($file,10000,",")) !== FALSE){   
+            array_push($data,$column);
+        }
+        fclose($file);
+        return $data;
+    }
 
     public function createCsvTable($tableName,$ColumnCount){
         $query = $this->buildCreateQuery($tableName,$ColumnCount);
