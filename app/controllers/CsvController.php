@@ -21,11 +21,11 @@ class CsvController extends Controller{
                 fclose($file);
                 $tableName = $csv['name'].date("Y/m/d_h:i:s");
                 $this->model('Csv')->createCsvTable($tableName,count($data[0]));
+                $this->model('Csv')->insertCsvTable($tableName,$data);
                 
             }
         } catch (Exception $exception) {
-            //create jsonException in controller
-            echo $exception->getMessage();
+            echo $this->jsonException($exception->getMessage());
         }    
     }
 
