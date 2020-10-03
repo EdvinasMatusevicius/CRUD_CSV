@@ -15,12 +15,10 @@ class CsvController extends Controller{
                 $csvModel = $this->model('Csv');
                 $data= $csvModel->parseCsvData($csv,$_POST['delimiter']);
                 $colCount = count($data[0]);
-                if($colCount <= 0 && $colCount >= 16384){
+                if($colCount <= 0 || $colCount >= 16384){
                     throw new Exception("Incorrect column count");
                 };
-                $csvModel->createCsvTable($tableName,$colCount);
-                $csvModel->insertCsvTable($tableName,$data); 
-                $csvModel->updateTableList($tableName); 
+                $this->store($tableName,$colCount,$data);
             }else{
                 echo $this->jsonException('File must be csv type, can\'t be empty and file name can\'t be longer than 70 characters');
             }
@@ -29,9 +27,12 @@ class CsvController extends Controller{
         }    
     }
 
-    public function store()
+    public function store($tableName,$colCount,$data)
     {
-        //
+        $csvModel = $this->model('Csv');
+        $csvModel->createCsvTable($tableName,$colCount);
+        $csvModel->insertCsvTable($tableName,$data); 
+        $csvModel->updateTableList($tableName); 
     }
 
     public function show($id)
