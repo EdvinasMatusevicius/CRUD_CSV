@@ -8,7 +8,16 @@ class CsvController extends Controller{
     }
 
     public function index (){
-        echo 'hello';
+        try {
+            $nestedArrRes = $this->csvModel->getAllFileNames();
+            $listArr = [];
+            foreach ($nestedArrRes as $arr) {
+                array_push($listArr,$arr['new']);
+            }
+            echo $this->jsonResponse($listArr);
+        } catch (Exception $exception) {
+            echo $this->jsonException($exception->getMessage());
+        } 
     }
     public function create()
     {
