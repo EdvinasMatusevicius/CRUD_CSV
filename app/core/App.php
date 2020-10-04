@@ -17,7 +17,7 @@ class App{
     }
     private function setController(){
         $controllerIndex = 1;
-        if($_SERVER['APP_ENV'] === 'dev'){
+        if($_SERVER['APP_ENV'] === 'dev'){ //for development with xampp
             $controllerIndex = 2;
         }
         $this->controller = $this->req[2] . "Controller";
@@ -25,7 +25,7 @@ class App{
     }
     private function callControllerMethod(){
         $methodIndex = 2;
-        if($_SERVER['APP_ENV'] === 'dev'){
+        if($_SERVER['APP_ENV'] === 'dev'){ //for development with xampp
             $methodIndex = 3;
         }
         $method = $this->req[$methodIndex];

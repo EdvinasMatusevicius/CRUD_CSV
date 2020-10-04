@@ -1,42 +1,66 @@
 <?php
 
 class Csv extends Database{
-
+    // need prepared statements for query
     public function parseCsvData(array $csv, $delimiter){
         $delimiterArr = ["comma"=>",","semicolon"=>";","pipe"=>"|"];
-        //SET USER SELECTED DELIMETER
         $fileName = $csv['tmp_name'];
         $file = fopen($fileName,"r");
         $data=[];
-        while(($column = fgetcsv($file,10000,",")) !== FALSE){   
+        while(($column = fgetcsv($file,10000,$delimiterArr[$delimiter])) !== FALSE){   
             array_push($data,$column);
         }
         fclose($file);
         return $data;
     }
 
-    public function createCsvTable(string $tableName,int $ColumnCount){
-        $query = $this->buildCreateQuery($tableName,$ColumnCount);
-        echo $query;
+    public function createCsvTable(string $tableName,int $columnCount){
+        $query = $this->buildCreateQuery($tableName,$columnCount);
         mysqli_query($this->getDbConnection(),$query);
     }
+
     public function insertCsvTable(string $tableName,array $data){
         $query = $this->buildInsertQuery($tableName,$data);
-        echo $query;
-
         mysqli_query($this->getDbConnection(),$query);
-
     }
+
     public function deleteCsvTable(string $tableName){
-        
+        $query = "DROP TABLE `$tableName`;";
+        mysqli_query($this->getDbConnection(),$query);
+    }
+
+    public function renameCsvTable($originalName,$newName){
+        $query = "ALTER TABLE `$originalName` RENAME TO `$newName`;";
+        mysqli_query($this->getDbConnection(),$query);
     }
     public function updateTableList(string $newTable,?string $oldTable=null){
         if($oldTable){
-            $query = "SELECT * FROM `tables_list` WHERE `new` = '$oldTable'";
+            $query = "UPDATE `tables_list` SET `old`='$oldTable' WHERE `new` = '$newTable';";
+            mysqli_query($this->getDbConnection(),$query);
         }else{
             $newFileQuery = "INSERT INTO `tables_list` (new) VALUES ('$newTable');";
             mysqli_query($this->getDbConnection(),$newFileQuery);
         }
+    }
+
+    public function getOldAndNewTableName($newTable){
+        $query = "SELECT `old`,`new` FROM `tables_list` WHERE `new` = '$newTable';";
+        $result = mysqli_query($this->getDbConnection(),$query);
+        return mysqli_fetch_assoc($result);
+    }
+
+    public function validateColumnAmount($data){
+        $columnsInFirstRow =count($data[0]);
+        $failedValidation = false;
+        if($columnsInFirstRow <= 0 || $columnsInFirstRow >= 16384){
+            $failedValidation = true;
+        }
+        foreach ($data as $row) {
+            if(count($row) !== $columnsInFirstRow){
+                $failedValidation = true;
+            }
+        }
+        return $failedValidation;
     }
     protected function buildCreateQuery(string $tableName,int $columnCount){
         $columnNameArr = range(1,$columnCount);
@@ -47,6 +71,7 @@ class Csv extends Database{
         }
         return "CREATE TABLE `$tableName` ($columns);";
     }
+
     protected function buildInsertQuery(string $tableName,array $data){
         $columnCount = count($data[0]);
         $rowCount = count($data);
