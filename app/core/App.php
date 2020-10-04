@@ -13,7 +13,11 @@ class App{
     }
 
     private function parseReq(){
-        $this->req = explode('/',filter_var(rtrim($_SERVER['REQUEST_URI'],'/'),FILTER_SANITIZE_URL));
+        $explodedChunks = 4; //limit on chunks because on show request url param value has /
+        if($_SERVER['APP_ENV'] === 'dev'){ //for development with xampp
+            $explodedChunks = 5;
+        }
+        $this->req = explode('/',filter_var(rtrim($_SERVER['REQUEST_URI'],'/'),FILTER_SANITIZE_URL),$explodedChunks);
     }
     private function setController(){
         $controllerIndex = 1;

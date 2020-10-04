@@ -54,7 +54,18 @@ class CsvController extends Controller{
 
     public function show()
     {
-
+        try {
+            $explodedChunks = 4; //limit on chunks because on show request url param value has /
+            if($_SERVER['APP_ENV'] === 'dev'){ //for development with xampp
+                $explodedChunks = 5;
+            }
+            $url = explode('/',$_SERVER['REQUEST_URI'],$explodedChunks); //parsing url param
+            $needeFileName = explode('=',end($url))[1];
+            $fileDataArr = $this->csvModel->getFileData($needeFileName);
+            echo $this->jsonResponse($fileDataArr);
+        } catch (Exception $exception) {
+            echo $this->jsonException($exception->getMessage());
+        } 
     }
 
     public function edit()

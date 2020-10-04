@@ -17,9 +17,19 @@ class Csv extends Database{
     public function getAllFileNames(){
         $query = "SELECT `new` FROM `tables_list`;";
         $result = mysqli_query($this->getDbConnection(),$query);
+        if (!$result) {
+            throw new Exception("No results in database");
+        }
         return $result->fetch_all(MYSQLI_ASSOC);
     }
-
+    public function getFileData($tableName){
+        $query = "SELECT * FROM `$tableName`";
+        $result = mysqli_query($this->getDbConnection(),$query);
+        if (!$result) {
+            throw new Exception("No results in database");
+        }
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
     public function createCsvTable(string $tableName,int $columnCount){
         $query = $this->buildCreateQuery($tableName,$columnCount);
         mysqli_query($this->getDbConnection(),$query);
@@ -52,6 +62,9 @@ class Csv extends Database{
     public function getOldAndNewTableName($newTable){
         $query = "SELECT `old`,`new` FROM `tables_list` WHERE `new` = '$newTable';";
         $result = mysqli_query($this->getDbConnection(),$query);
+        if (!$result) {
+            throw new Exception("No results in database");
+        }
         return mysqli_fetch_assoc($result);
     }
 
