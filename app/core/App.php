@@ -29,7 +29,7 @@ class App{
             $controllerIndex = 2;
         }
         if (array_key_exists( $controllerIndex, $this->req )){
-            $this->controller = $this->req[$controllerIndex] . "Controller";
+            $this->controller = ucfirst($this->req[$controllerIndex]) . "Controller";
         }
         if(file_exists("app/controllers/". $this->controller . ".php")){
             require_once "app/controllers/". $this->controller . ".php";
