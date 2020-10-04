@@ -37,7 +37,10 @@ class Csv extends Database{
 
     public function insertCsvTable(string $tableName,array $data){
         $query = $this->buildInsertQuery($tableName,$data);
-        mysqli_query($this->getDbConnection(),$query);
+        foreach ($data as $row) {
+            $query->bind_param(str_repeat("s", count($row)), ...$row);
+            $query->execute();
+        }
     }
 
     public function deleteCsvTable(string $tableName){
@@ -51,11 +54,15 @@ class Csv extends Database{
     }
     public function updateTableList(string $newTable,?string $oldTable=null){
         if($oldTable){
-            $query = "UPDATE `tables_list` SET `old`='$oldTable' WHERE `new` = '$newTable';";
-            mysqli_query($this->getDbConnection(),$query);
+            $query = "UPDATE `tables_list` SET `old`=? WHERE `new`=? ;";
+            $stmt = $this->getDbConnection()->prepare($query);
+            $stmt->bind_param('ss',$oldTable,$newTable);
+            $stmt->execute();
         }else{
-            $newFileQuery = "INSERT INTO `tables_list` (new) VALUES ('$newTable');";
-            mysqli_query($this->getDbConnection(),$newFileQuery);
+            $newFileQuery = "INSERT INTO `tables_list` (new) VALUES (?);";
+            $stmt = $this->getDbConnection()->prepare($newFileQuery);
+            $stmt->bind_param('s',$newTable);
+            $stmt->execute();
         }
     }
 
@@ -93,13 +100,9 @@ class Csv extends Database{
 
     protected function buildInsertQuery(string $tableName,array $data){
         $columnCount = count($data[0]);
-        $rowCount = count($data);
         $columnNames = implode("`,`",range(1,$columnCount));
-        $query = "INSERT INTO `$tableName` (`$columnNames`) VALUES ";
-        for ($i=0; $i <=$rowCount-1 ; $i++) { 
-            $row = implode('\',\'',$data[$i]);
-            $query .= "('$row')" . ($rowCount-1 !== $i ? ',':';');
-        }
-        return $query;
+        $params = implode(",", array_fill(0, $columnCount, "?"));
+        $query = "INSERT INTO `$tableName` (`$columnNames`) VALUES ($params)";
+        return $this->getDbConnection()->prepare($query);
     }
 }
