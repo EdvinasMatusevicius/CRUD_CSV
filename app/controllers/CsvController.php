@@ -60,7 +60,11 @@ class CsvController extends Controller{
                 $explodedChunks = 5;
             }
             $url = explode('/',$_SERVER['REQUEST_URI'],$explodedChunks); //parsing url param
-            $needeFileName = explode('=',end($url))[1];
+            if (array_key_exists( 1, $urlParamsArr=explode('=',end($url))  )){
+                $needeFileName = $urlParamsArr[1];
+            }else{
+                throw new Exception("Incorrect file name");
+            };
             $fileDataArr = $this->csvModel->getFileData($needeFileName);
             echo $this->jsonResponse($fileDataArr);
         } catch (Exception $exception) {

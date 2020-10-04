@@ -13,6 +13,7 @@ class Controller{
             $jsonResponse = json_encode(["jsonError" => json_last_error_msg()]);
             http_response_code(500);
         }
+        http_response_code(200);
         echo $jsonResponse;
     }
     public function jsonException($message){
@@ -20,8 +21,9 @@ class Controller{
         $jsonExceptionResponse = json_encode(['error'=> $message ?? 'error occurred']);
         if ($jsonExceptionResponse === false) {
             $jsonExceptionResponse = json_encode(["jsonError" => json_last_error_msg()]);
-            http_response_code(400);
+            http_response_code(500);
         }
+        http_response_code(400);
         echo $jsonExceptionResponse;
     }
 }
