@@ -58,6 +58,10 @@ class App{
     }
     private function jsonException($message){
         header("Content-Type: application/json");
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Origin, Content-Type, X-Requested-With'); 
+
         $jsonExceptionResponse = json_encode(['error'=> $message ?? 'error occurred']);
         if ($jsonExceptionResponse === false) {
             $jsonExceptionResponse = json_encode(["jsonError" => json_last_error_msg()]);

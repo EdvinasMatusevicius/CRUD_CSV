@@ -4,6 +4,9 @@ class Csv extends Database{
     // need prepared statements for query
     public function parseCsvData(array $csv, $delimiter){
         $delimiterArr = ["comma"=>",","semicolon"=>";","pipe"=>"|"];
+        if(!$delimiterArr[$delimiter]){
+            throw new Exception("Invalid delimeter");
+        }
         $fileName = $csv['tmp_name'];
         $file = fopen($fileName,"r");
         $data=[];
